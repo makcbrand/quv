@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airplane Comfort</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007BFF;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .result-item {
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Airplane Comfort Finder</h1>
+        <div class="form-group">
+            <label for="airplaneType">Airplane Type:</label>
+            <input type="text" id="airplaneType" placeholder="e.g., Boeing 737">
+        </div>
+        <div class="form-group">
+            <label for="minServiceQuality">Minimum Service Quality:</label>
+            <input type="number" id="minServiceQuality" placeholder="e.g., 7">
+        </div>
+        <div class="form-group">
+            <label for="minSeatComfort">Minimum Seat Comfort:</label>
+            <input type="number" id="minSeatComfort" placeholder="e.g., 8">
+        </div>
+        <button id="searchBtn">Search</button>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const airplaneType = document.getElementById('airplaneType').value;
+            const minServiceQuality = document.getElementById('minServiceQuality').value;
+            const minSeatComfort = document.getElementById('minSeatComfort').value;
+
+            let url = '/api/airplanes/filter?';
+
+            if (airplaneType) url += `airplane_type=${airplaneType}&`;
+            if (minServiceQuality) url += `min_service_quality=${minServiceQuality}&`;
+            if (minSeatComfort) url += `min_seat_comfort=${minSeatComfort}`;
+
+            // Remove the last '&' if any
+            if (url.endsWith('&')) {
+                url = url.slice(0, -1);
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+                    if (data.length === 0) {
+                        resultsDiv.innerHTML = '<p>No results found.</p>';
+                    } else {
+                        data.forEach(item => {
+                            const div = document.createElement('div');
+                            div.className = 'result-item';
+                            div.innerHTML = `
+                                <p><strong>Airplane Type:</strong> ${item.airplane_type}</p>
+                                <p><strong>Service Quality:</strong> ${item.service_quality}</p>
+                                <p><strong>Seat Comfort:</strong> ${item.seat_comfort}</p>
+                                <p><strong>Food Quality:</strong> ${item.food_quality}</p>
+                            `;
+                            resultsDiv.appendChild(div);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        });
+    </script>
+</body>
+</html>
